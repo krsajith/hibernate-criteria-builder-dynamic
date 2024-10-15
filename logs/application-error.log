@@ -1,0 +1,14 @@
+15-10-2024 12:01:41.141 [main] ERROR  LoggingFailureAnalysisReporter.java -> report(40) - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Liquibase failed to start because no changelog could be found at 'classpath:/db/changelog/db.changelog-master.yaml'.
+
+Action:
+
+Make sure a Liquibase changelog is present at the configured path.
+
