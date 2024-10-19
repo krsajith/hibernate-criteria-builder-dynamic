@@ -1,7 +1,6 @@
 package com.example.accessingdatajpa;
 
 import lombok.Data;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -20,7 +19,7 @@ public class SearchCriteria implements Comparable<SearchCriteria> {
     }
 
     @Override
-    public int compareTo(@NotNull SearchCriteria o) {
+    public int compareTo(SearchCriteria o) {
         return Objects.equals(key, o.key) && Objects.equals(operation, o.operation) && Objects.equals(value, o.value) ? 0 : key.compareTo(o.key);
     }
 }

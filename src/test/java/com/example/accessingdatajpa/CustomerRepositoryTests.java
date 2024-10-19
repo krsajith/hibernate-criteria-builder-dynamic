@@ -18,10 +18,11 @@ package com.example.accessingdatajpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Selection;
 import net.bytebuddy.ByteBuddy;
@@ -30,18 +31,30 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
-@DataJpaTest
+@SpringBootTest
 public class CustomerRepositoryTests {
 	@Autowired
 	private TestEntityManager entityManager;
 
 	@Autowired
+	private ApplicationContext applicationContext;
+
+	@Autowired
 	private CustomerRepository customers;
 
-	@Test
+    @Test
 	public void testFindByLastName() throws ClassNotFoundException {
+		Map<String,Class<?>> map = new HashMap<>();
+		var entities = entityManager.getEntityManager().getMetamodel().getEntities();
+		for (var entity : entities) {
+			map.put(entity.getName(), entity.getClass());
+		}
+
+//		.stream().collect(Collectors.toMap(Entity::getKey, item -> item));
+
 
 		Customer customer = new Customer("first", "last");
 		entityManager.persist(customer);
@@ -53,7 +66,7 @@ public class CustomerRepositoryTests {
 		 query.setParameter("lastName", "last");
 		 List<String> result = query.getResultList();
 
-		var cb = entityManager.getEntityManager().getCriteriaBuilder().createQuery(Class.forName("Customer"));
+		var cb = entityManager.getEntityManager().getCriteriaBuilder().createQuery(map.get("Customer"));
 		Selection<?> select;
 //		cb.select(select);
 
@@ -66,8 +79,14 @@ public class CustomerRepositoryTests {
 	public void dynamicCriteria() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, InstantiationException {
 		CriteriaBuilder builder = entityManager.getEntityManager().getCriteriaBuilder();
 
+		Map<String,Class<?>> map = new HashMap<>();
+		var entities = entityManager.getEntityManager().getMetamodel().getEntities();
+		for (var entity : entities) {
+			map.put(entity.getName(), entity.getJavaType());
+		}
+
 		var cq = builder.createQuery(String.class);
-		var student = cq.from(Class.forName("com.example.accessingdatajpa.Customer"));
+		var student = cq.from(map.get("Customer"));
 		cq.select(student.get("lastName"));
 		Predicate[] predicates = new Predicate[]{};
 		cq.where(predicates);
@@ -100,6 +119,12 @@ public class CustomerRepositoryTests {
 //		Field f = target.getDeclaredField("hello");
 //		f.setAccessible(true);
 //		System.out.println(f.get(targetObj));
+
+	}
+
+	@Test
+	void saveOutside(){
+		Customer customer = new Customer("first", "last");
 
 	}
 }
